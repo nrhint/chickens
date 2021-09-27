@@ -1,0 +1,27 @@
+IDEA:
+Make a virtual chicken game
+
+PLANS:
+(1) Make it so that you can take care of a chicken by giving it food and water.
+(1.1) Clicking on the chicken will feed and water it
+(1.2) Different types of food fill it up more
+(2) Enact some sort of egg collection so that you can sell the eggs
+(3) Allow the purchasing of more chickens
+(4) Make the need to buy food and water if you have more than x chickens
+(5) Upgrade the chickens using money gained from buying eggs
+(6) Make housing for the chickens so they live longer/lay more/don't get eaten
+(7) 
+
+GOALS:
+
+NOTES:
+  Foods:
+    basic
+    candy
+    grain
+    super
+  drinks:
+    water
+    soda
+    lemonade
+    coolade
