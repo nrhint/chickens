@@ -4,7 +4,7 @@
 import pygame
 from random import randint
 
-from chicken import Chicken
+from chicken import *
 from text import Text
 
 v = True
@@ -14,8 +14,8 @@ pygame.init()
 font = pygame.font.Font(None, 36)
 
 
-width=350
-height=400
+width=450
+height=600
 screen = pygame.display.set_mode( (width, height ) )
 pygame.display.set_caption('feed my chicken(s)')
 
@@ -36,15 +36,18 @@ fpsText = Text(screen, font, "loading...", BLACK, (50, 10))
 chickenImage = pygame.image.load("images/chicken.png")
 
 ##Setup the objects lists:
+eggs = 0
 chickens = []
 for x in range(0, 1):
     chickens.append(Chicken(screen, chickenImage, x = 50, y = 50, v = vv))
 
 chickenCount = Text(screen, font, "loading...", BLACK, (200, 10))
+eggCount = Text(screen, font, "loading...", BLACK, (50, 540))
 
 screen.fill(BACKGROUND_GREEN)
 pygame.display.flip()
 
+frameCount = 0
 running = True
 while (running):
     for event in pygame.event.get():
@@ -57,8 +60,14 @@ while (running):
                 if chicken.rect.collidepoint(x, y):
                     if vv: print('clicked on chicken')
                     chicken.input(event.button)
-    if randint(0, 1000) < 1:
-        chickens.append(Chicken(screen, chickenImage, x = randint(50, 200), y = randint(50, 250), v = vv))
+        if event.type == EGG_LAIED:
+            eggs += 1
+    #Spawn chickens
+    if randint(0, 10000) < 3 and len(chickens) < 100:
+        chickens.append(Chicken(screen, chickenImage, x = randint(50, 350), y = randint(50, 500), v = vv))
+    #add eggs when needed:
+    if frameCount % 1800 == 0:
+        eggs += len(chickens)
     ##Update screen:
     screen.fill(BACKGROUND_GREEN)
     for chicken in chickens:
@@ -72,6 +81,9 @@ while (running):
     fpsText.update(f"{fpsClock.get_fps():2.0f} FPS")
     chickenCount.draw()
     chickenCount.update("%s chicken(s)"%len(chickens))
+    eggCount.draw()
+    eggCount.update("%s eggs"%eggs)
+    frameCount += 1
     pygame.display.flip()
     fpsClock.tick(FPS)
 
