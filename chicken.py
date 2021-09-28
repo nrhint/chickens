@@ -38,7 +38,7 @@ class Chicken:
         if foodItem is not None:
             if self.v: print("Giving %s to chicken %s"%(foodItem, self))
             if foodItem == 'basic':
-                self.food += 1
+                self.food += 5
             else:
                 print("Invalid food (%s) given to chicken (%s)."%(self, foodItem))
         if self.food > self.foodMax: self.food = self.foodMax
@@ -48,7 +48,7 @@ class Chicken:
         if drinkItem is not None:
             if self.v: print("Giving %s to chicken %s"%(drinkItem, self))
             if drinkItem == 'water':
-                self.hydration += 1
+                self.hydration += 5
             else:
                 print("Invalid hydrate (%s) given to chicken (%s)."%(drinkItem, self))
         if self.hydration > self.hydrationMax: self.hydration = self.hydrationMax
@@ -76,7 +76,7 @@ class Chicken:
         if not self.moving:
             if randint(0, 1000) < (self.food+self.hydration)/16:
                 self.moving = True
-                self.targetPos = (randint(50, 350), randint(50, 500))
+                self.targetPos = (randint(50, 300), randint(50, 500))
                 #print("Moving to (%s, %s)"%self.targetPos)
         else:
             if self.x > self.targetPos[0]:
@@ -120,6 +120,9 @@ class Chicken:
 
     def input(self, mouseState, other = False): ##This will check if the chicken is clicked on.
         if self.v: print(mouseState)
+        if mouseState == 1: # chicken is clicked
+            if randint(1, 2) == 1: self.eat('basic')
+            else: self.drink("water")
         if mouseState == 4: #The left button is clicked:
             self.eat('basic')
         elif mouseState == 5: #The right button is clicked:
