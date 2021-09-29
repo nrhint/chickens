@@ -3,6 +3,7 @@
 
 import pygame
 from random import randint
+from math import sqrt
 from bar import Bar
 
 vv = False
@@ -21,12 +22,12 @@ class Chicken:
         self.y = y
         self.lastx = self.x
         self.lasty = self.y
-        self.food = 50 #Range of 0-100
-        self.foodBar = Bar(self.x, self.y, 100, 8, self.screen, color = (150, 150, 0))
-        self.hydration = 50 #Range of 0-100
-        self.hydrationBar = Bar(self.x, self.y+10, 100, 8, self.screen, color = (100, 100, 200))
+        self.food = 50 #Range of 0-100 by default
         self.foodMax = 100
+        self.foodBar = Bar(self.x, self.y, self.foodMax, 8, self.screen, color = (150, 150, 0))
+        self.hydration = 50 #Range of 0-100 by default
         self.hydrationMax = 100
+        self.hydrationBar = Bar(self.x, self.y+10, self.hydrationMax, 8, self.screen, color = (100, 100, 200))
         self.moving = False
         self.speed = 1
         self.targetPos = (self.x, self.y)
@@ -54,15 +55,15 @@ class Chicken:
         if self.hydration > self.hydrationMax: self.hydration = self.hydrationMax
         if self.v: self.status()
 
-    def hunger(self, chance = 4, amount = 1):
+    def hunger(self, chance = 4, amount = 2):
         if randint(0, 1000) < chance:
-            self.food -= amount
+            self.food -= amount + sqrt(self.foodMax)*2
             if vv:print("%s got hungry"%self)
         if self.v: self.status()
 
-    def thirst(self, chance = 4, amount = 1):
+    def thirst(self, chance = 4, amount = 2):
         if randint(0, 1000) < chance:
-            self.hydration -= amount
+            self.hydration -= amount + sqrt(self.hydrationMax)*2
             if vv:print("%s got thirsty"%self)
         if self.v: self.status()
 
@@ -74,9 +75,15 @@ class Chicken:
 
     def move(self):
         if not self.moving:
-            if randint(0, 1000) < (self.food+self.hydration)/16:
+            if randint(0, 1000) < (self.food+self.hydration)/10:
                 self.moving = True
-                self.targetPos = (randint(50, 300), randint(50, 500))
+                if vv: print((self.food+self.hydration)/10)
+                #calculate the target position:
+                mult = 1
+                if ((self.food+self.hydration)/100) > 1:
+                    mult = ((self.food+self.hydration)/100)
+                    
+                self.targetPos = (int(randint(50, 300)/mult), int(randint(50, 450)/mult))
                 #print("Moving to (%s, %s)"%self.targetPos)
         else:
             if self.x > self.targetPos[0]:
@@ -87,7 +94,7 @@ class Chicken:
                 self.y -= self.speed
             elif self.y < self.targetPos[1]:
                 self.y += self.speed
-            if (self.x, self.y) == self.targetPos:
+            if self.targetPos[0]-self.speed < self.x < self.targetPos[0]+self.speed and self.targetPos[1]-self.speed < self.y < self.targetPos[1]+self.speed:
                 self.moving = False
                 pygame.event.post(eggLaied)
                 #print("Finished moving")
@@ -121,9 +128,9 @@ class Chicken:
     def input(self, mouseState, other = False): ##This will check if the chicken is clicked on.
         if self.v: print(mouseState)
         if mouseState == 1: # chicken is clicked
-            if randint(1, 2) == 1: self.eat('basic')
-            else: self.drink("water")
-        if mouseState == 4: #The left button is clicked:
+            if randint(1, 2) == 1: self.eat('basic');self.eat('basic');self.eat('basic');self.eat('basic');self.eat('basic')
+            else: self.drink("water");self.drink("water");self.drink("water");self.drink("water");self.drink("water");
+        elif mouseState == 4: #The left button is clicked:
             self.eat('basic')
         elif mouseState == 5: #The right button is clicked:
             self.drink('water')

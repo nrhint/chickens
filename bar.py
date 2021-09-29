@@ -28,7 +28,7 @@ class Bar:
         if self.value > self.valueMax: self.value = self.valueMax
          #Update the rects:
         self.borderRect = pygame.rect.Rect(self.x, self.y, self.width, self.height)
-        self.valueRect = pygame.rect.Rect(self.x, self.y, (self.value-self.valueMin), self.height)
+        self.valueRect = pygame.rect.Rect(self.x, self.y, (self.value/(self.valueMax-self.valueMin))*self.width, self.height)
 
         if self.v: print(self.borderRect)
         if self.v: print(self.valueRect)
