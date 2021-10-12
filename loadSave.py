@@ -32,7 +32,10 @@ def loadData(filepath, screen, chickenImage):
             elif line == '':
                 pass
             else:
-                stats.append(int(line))
+                try:
+                    stats.append(int(line))
+                except ValueError:
+                    stats.append(float(line))
         return (chickens, stats)
     except FileNotFoundError:
         return []

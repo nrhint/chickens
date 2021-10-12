@@ -13,8 +13,9 @@ eggLaied = pygame.event.Event(EGG_LAIED, message="Egg!")
 
 
 class Chicken:
-    def __init__(self, screen, image, x = 0, y = 0, v = False):
+    def __init__(self, screen, image, gameData = None, x = 0, y = 0, v = False):
         self.image = image
+        self.gameData = gameData
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(x, y)
         self.screen = screen
@@ -38,32 +39,40 @@ class Chicken:
     def eat(self, foodItem = None):
         if foodItem is not None:
             if self.v: print("Giving %s to chicken %s"%(foodItem, self))
-            if foodItem == 'basic':
-                self.food += 5
-            else:
-                print("Invalid food (%s) given to chicken (%s)."%(self, foodItem))
-        if self.food > self.foodMax: self.food = self.foodMax
+            if self.gameData.eggs > 0:
+                if foodItem == 'basic':
+                    self.food += 5
+                    self.gameData.eggs -= self.gameData.foodCost
+                else:
+                    print("Invalid food (%s) given to chicken (%s)."%(self, foodItem))
+            #else:
+                #print("Not enough eggs")
+        if self.food > self.foodMax:self.food = self.foodMax; self.gameData.eggs += self.gameData.foodCost
         if self.v: self.status()
             
     def drink(self, drinkItem = None):
         if drinkItem is not None:
-            if self.v: print("Giving %s to chicken %s"%(drinkItem, self))
-            if drinkItem == 'water':
-                self.hydration += 5
-            else:
-                print("Invalid hydrate (%s) given to chicken (%s)."%(drinkItem, self))
-        if self.hydration > self.hydrationMax: self.hydration = self.hydrationMax
+            if self.gameData.eggs > 0:
+                if self.v: print("Giving %s to chicken %s"%(drinkItem, self))
+                if drinkItem == 'water':
+                    self.hydration += 5
+                    self.gameData.eggs -= self.gameData.hydrationCost
+                else:
+                    print("Invalid hydrate (%s) given to chicken (%s)."%(drinkItem, self))
+            #else:
+            #    print("Not enough eggs")
+        if self.hydration > self.hydrationMax: self.hydration = self.hydrationMax; self.gameData.eggs += self.gameData.hydrationCost
         if self.v: self.status()
 
     def hunger(self, chance = 4, amount = 2):
         if randint(0, 1000) < chance:
-            self.food -= amount + sqrt(self.foodMax)*2
+            self.food -= amount
             if vv:print("%s got hungry"%self)
         if self.v: self.status()
 
     def thirst(self, chance = 4, amount = 2):
         if randint(0, 1000) < chance:
-            self.hydration -= amount + sqrt(self.hydrationMax)*2
+            self.hydration -= amount
             if vv:print("%s got thirsty"%self)
         if self.v: self.status()
 

@@ -2,16 +2,17 @@ IDEA:
 Make a virtual chicken game
 
 PLANS:
+(13) rework the game data to be in a class so that everyone can use it
+(14) Dix error if all the chickens die
 (1.2) Different types of food fill it up more
 (1.4) Have feeders that can be bought at the store for feeding the chickens
-(3) Allow the purchasing of more chickens
 (4) Make the need to buy food and water if you have more than x chickens
 (5) Upgrade the chickens using money gained from buying eggs
 (6) Make housing for the chickens so they live longer/lay more/don't get eaten
-(7) Allow the purchasing of items and upgrades
-(7.1) Change the main loop to have a main state and a store state
 (7.2) Add the feeder item
-(9) Create savefile so that you can resume progress
+(10) Make foxes that come and eat the chickens but if you click enough times you will get a fox fur which is a new currency.
+(11) Make it cost eggs to feed the chickens
+(12) allow the user to disable seeing the chickens
 
 DONE:
 (1) DONE: Make it so that you can take care of a chicken by giving it food and water.
@@ -19,6 +20,10 @@ DONE:
 (1.3) DONE: Make them move
 (2) DONE: Enact some sort of egg collection so that you can sell the eggs. eggs are laid when the chicken stops moving. make it so when the chicken is more full it will move more often and shorter distances.
 (8) DONE: Change the egg laying so that when the chicken is full it will lay more eggs
+(9) Create savefile so that you can resume progress
+(7.1) Change the main loop to have a main state and a store state
+(7) Allow the purchasing of items and upgrades
+(3) Allow the purchasing of more chickens
 
 
 NOTES:
