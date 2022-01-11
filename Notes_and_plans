@@ -38,3 +38,7 @@ One day will be one minute (1800 frames)
     soda
     lemonade
     coolade
+
+
+The structure of the game queue:
+[what the data is for, values, ...]
