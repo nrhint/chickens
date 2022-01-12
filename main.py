@@ -179,11 +179,11 @@ while (running):
                 for item in settingItems:
                     if item.rect.collidepoint(x, y):
                         if item.text == "Hide chickens":
-                            gameData.drawChickens = 0
+                            gameData.drawChickensSetting = 0
                             print("Hiding chickens")
                             item.text = "Show chickens"
                         elif item.text == "Show chickens":
-                            gameData.drawChickens = 1
+                            gameData.drawChickensSetting = 1
                             item.text = "Hide chickens"
     while not gameQueue.empty():
         obj = gameQueue.get()
@@ -224,25 +224,14 @@ while (running):
 
     #Depending on the state the chickens may or may not be drawn...
     if state == "game":
-        for chicken in gameData.chickens:
-            died = chicken.update()
-            if died:
-                gameData.chickens.remove(chicken)
-            elif gameData.drawChickens:
-                chicken.draw()
+        if not gameData.drawChickens and gameData.drawChickensSetting: gameData.drawChickens = 1
     elif state == "store":
-        for chicken in gameData.chickens:
-            died = chicken.update()
-            if died:
-                gameData.chickens.remove(chicken)
+        if gameData.drawChickens: gameData.drawChickens = 0
         for item in menuItems:
             item.update()
             item.draw()
     elif state == "settings":
-        for chicken in gameData.chickens:
-            died = chicken.update()
-            if died:
-                gameData.chickens.remove(chicken)
+        if gameData.drawChickens: gameData.drawChickens = 0
         for item in settingItems:
             item.update()
             item.draw()
@@ -250,6 +239,12 @@ while (running):
     else:
         print("INVALID STATE OF: %s RETURNING TO GAME"%state)
         state = "game"
+    for chicken in gameData.chickens:
+        died = chicken.update()
+        if died:
+            gameData.chickens.remove(chicken)
+        elif gameData.drawChickens:
+            chicken.draw()
 
     for egg in gameData.eggsList:
         egg.update()

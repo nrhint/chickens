@@ -22,7 +22,7 @@ def loadData(filepath, screen, chickenImage, gameQueue):
             if "chicken: " in line: #if the line contains a chicken:
                 line = line.replace('chicken: ', '')
                 line = line.split(', ')
-                tmp = Chicken(screen, chickenImage, gameQueue, int(line[0]), int(line[1]))
+                tmp = Chicken(screen, chickenImage, gameQueue, x = int(line[0]), y = int(line[1]))
                 tmp.food = int(line[2])
                 tmp.hydration = int(line[3])
                 tmp.speed = int(line[4])

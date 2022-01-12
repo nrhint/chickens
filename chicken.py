@@ -35,6 +35,7 @@ class Chicken:
         self.targetPos = (self.x, self.y)
         self.reDraw = True
         self.level = level
+        self.baseLevelUpChance = 5
         
         self.v = v #verbose output
         if self.v: print(self.rect)
@@ -119,14 +120,22 @@ class Chicken:
         self.hunger()
         self.thirst()
         self.move()
+        levelUpChance = self.baseLevelUpChance
         if self.food <= 0:
             if self.v or vv or True: print("Chicken %s died from hunger..."%self)
             if self.v or vv: self.status()
             return True
+        elif self.food/self.foodMax > 0.8:
+            levelUpChance += 5
         if self.hydration <= 0:
             if self.v or vv or True: print("Chicken %s died from thirst..."%self)
             if self.v or vv: self.status()
             return True
+        elif self.hydration/ self.hydrationMax > 0.8:
+            levelUpChance += 5
+        if randint(0, 100) <= levelUpChance:
+            self.level += 1
+            self.image = pygame.transform.scale(self.image, (50+(self.level-1*10), 50+(self.level-1*10)))
         #if self.v: self.status()
         self.rect = self.rect.move(self.x-self.lastx, self.y-self.lasty)
         self.lastx = self.x
