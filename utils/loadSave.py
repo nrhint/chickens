@@ -6,13 +6,13 @@ def saveData(filepath, chickens, stats):
     for item in stats:
         data += str(item) + "\n"
     for chicken in chickens:
-        data += "chicken: %s, %s, %s, %s, %s, %s, %s\n"%(chicken.x, chicken.y, int(chicken.food), int(chicken.hydration), chicken.speed, chicken.foodMax, chicken.hydrationMax)
+        data += "chicken: %s, %s, %s, %s, %s, %s, %s\n"%(int(chicken.x), int(chicken.y), int(chicken.food), int(chicken.hydration), chicken.speed, chicken.foodMax, chicken.hydrationMax)
     with open(filepath, 'w') as file:
         file.write(data)
 
 from chicken import Chicken
 
-def loadData(filepath, screen, chickenImage):
+def loadData(filepath, screen, chickenImage, gameQueue):
     try:
         with open(filepath, 'r') as file:
             data = file.read()
@@ -22,7 +22,7 @@ def loadData(filepath, screen, chickenImage):
             if "chicken: " in line: #if the line contains a chicken:
                 line = line.replace('chicken: ', '')
                 line = line.split(', ')
-                tmp = Chicken(screen, chickenImage, int(line[0]), int(line[1]))
+                tmp = Chicken(screen, chickenImage, gameQueue, x = int(line[0]), y = int(line[1]))
                 tmp.food = int(line[2])
                 tmp.hydration = int(line[3])
                 tmp.speed = int(line[4])

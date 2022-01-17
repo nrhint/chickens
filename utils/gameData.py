@@ -2,12 +2,13 @@
 ##This class will contain all of the game data variables that are needed by things to run
 
 from chicken import *
-from loadSave import saveData, loadData
+from egg import *
+from utils.loadSave import saveData, loadData
 
 class GameData:
-    def __init__(self, screen,chickenImage):
+    def __init__(self, screen, chickenImage, gameQueue):
         #Open the save file and import the vars:
-        self.result = loadData('save.dat', screen, chickenImage)
+        self.result = loadData('save.dat', screen, chickenImage, gameQueue)
         #print(self.result)
         if self.result == []: #No chickens were found:
             print("No chickens found")
@@ -25,7 +26,7 @@ class GameData:
             self.feeder = 0
             self.hydrator = 0
             for x in range(0, 1):
-                self.chickens.append(Chicken(screen, chickenImage, self, x = 50, y = 50, v = vv))
+                self.chickens.append(Chicken(screen, chickenImage, gameQueue, self, x = 50, y = 50, v = vv))
         else:
             self.eggs = self.result[1][0]
             self.speedLevel = self.result[1][1]

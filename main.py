@@ -3,11 +3,14 @@
 
 import pygame
 from random import randint
+import queue
 
 from chicken import *
-from button import Button
-from text import Text
-from gameData import GameData
+from egg import *
+from utils.button import Button
+from utils.text import Text
+from utils.gameData import GameData
+from utils.loadImages import *
 
 v = True
 vv = False
@@ -33,11 +36,13 @@ BLUE = (0, 0, 255)
 fpsClock = pygame.time.Clock()
 fpsText = Text(screen, font, "loading...", BLACK, (50, 10))
 
-##Load the images. This may be moved to another file later on
-chickenImage = pygame.image.load("images/chicken.png")
+##Setup the queue to be able to pass it to the chickens:
+gameQueue = queue.SimpleQueue()
 
 ## Try to load from the save file:
-gameData = GameData(screen, chickenImage)
+gameData = GameData(screen, chickenImage, gameQueue)
+gameData.eggsList = []
+
 
 chickenCount = Text(screen, font, "loading...", BLACK, (200, 10))
 eggCount = Text(screen, font, "loading...", BLACK, (100, 580))
@@ -85,19 +90,22 @@ screen.fill(BACKGROUND_GREEN)
 pygame.display.flip()
 
 frameCount = 0
-state = "game" ## Posible states are: [game, store]
+state = "game" ## Possible states are: [game, store]
 running = True
 while (running):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN:
             # Set the x, y postions of the mouse click
             x, y = event.pos
             for chicken in gameData.chickens:
                 if chicken.rect.collidepoint(x, y):
                     if vv: print('clicked on chicken')
                     chicken.input(event.button)
+            for egg in gameData.eggsList:
+                if egg.rect.collidepoint(x, y):
+                    egg.input()
             for button in buttons:
                 if button.rect.collidepoint(x, y):
                     if vv: print('Clicked on button')
@@ -146,12 +154,12 @@ while (running):
                                     for chicken in gameData.chickens:
                                         chicken.speed += 1
                                 elif item.action2 == 'addFood':
-#                                   #gameData.speedLevel = int(num)
+                                   #gameData.speedLevel = int(num)
                                     for chicken in gameData.chickens:
                                         chicken.foodMax += int(chicken.foodMax/10)
                                         chicken.foodBar.valueMax = chicken.foodMax
                                 elif item.action2 == 'addHydration':
-#                                   #gameData.speedLevel = int(num)
+                                   #gameData.speedLevel = int(num)
                                     for chicken in gameData.chickens:
                                         chicken.hydrationMax += int(chicken.hydrationMax/10)
                                         if vv: print(chicken.hydration, chicken.hydrationMax)
@@ -171,17 +179,39 @@ while (running):
                 for item in settingItems:
                     if item.rect.collidepoint(x, y):
                         if item.text == "Hide chickens":
-                            gameData.drawChickens = 0
+                            gameData.drawChickensSetting = 0
                             print("Hiding chickens")
                             item.text = "Show chickens"
                         elif item.text == "Show chickens":
-                            gameData.drawChickens = 1
+                            gameData.drawChickensSetting = 1
                             item.text = "Hide chickens"
-        if event.type == EGG_LAIED:
-            gameData.eggs += 1
+    while not gameQueue.empty():
+        obj = gameQueue.get()
+        if obj[0] == 'newEgg':
+            gameData.eggsList.append(Egg(screen, gameQueue, eggImage, obj[1], obj[2], obj[3], hatchChance = gameData.spawnRate))
+        elif obj[0] == 'destroyEgg':
+            gameData.eggsList.remove(obj[1])
+        elif obj[0] == 'eggHatched':
+            gameData.eggsList.remove(obj[1])
+            tmp = Chicken(screen, chickenImage, gameQueue, gameData, x = obj[2], y = obj[3], v = vv)
+            tmp.speed = gameData.chickens[0].speed
+            tmp.foodMax = gameData.chickens[0].foodMax
+            tmp.hydrationMax = gameData.chickens[0].hydrationMax
+            gameData.chickens.append(tmp)
+        elif obj[0] == 'eggCollected':
+            gameData.eggs += obj[2]
+            try:
+                gameData.eggsList.remove(obj[1])
+            except ValueError:
+                print("Unable to remove egg %s. most likely because we didn't process it was collected fast enough."%obj[1])
+
+        else:
+            print("WARNING!!!")
+            print("Unknown object in game queue! This data WILL be lost:")
+            print(obj)
     #Spawn gameData.chickens
-    if randint(0, 10000) < gameData.spawnRate and fpsClock.get_fps() > gameData.FPS-10:
-        tmp = Chicken(screen, chickenImage, gameData, x = randint(50, 350), y = randint(50, 500), v = vv)
+    if len(gameData.chickens) <= 1:
+        tmp = Chicken(screen, chickenImage, gameQueue, gameData, x = randint(50, 350), y = randint(50, 500), v = vv)
         tmp.speed = gameData.chickens[0].speed
         tmp.foodMax = gameData.chickens[0].foodMax
         tmp.hydrationMax = gameData.chickens[0].hydrationMax
@@ -194,27 +224,14 @@ while (running):
 
     #Depending on the state the chickens may or may not be drawn...
     if state == "game":
-        for chicken in gameData.chickens:
-            died = chicken.update()
-            if died:
-                gameData.chickens.remove(chicken)
-                #print("Chicken %s died"%chicken)
-            if gameData.drawChickens:
-                chicken.draw()
-            #screen.blit(chickenImage, (chicken.x, chicken.y))
+        if not gameData.drawChickens and gameData.drawChickensSetting: gameData.drawChickens = 1
     elif state == "store":
-        for chicken in gameData.chickens:
-            died = chicken.update()
-            if died:
-                gameData.chickens.remove(chicken)
+        if gameData.drawChickens: gameData.drawChickens = 0
         for item in menuItems:
             item.update()
             item.draw()
     elif state == "settings":
-        for chicken in gameData.chickens:
-            died = chicken.update()
-            if died:
-                gameData.chickens.remove(chicken)
+        if gameData.drawChickens: gameData.drawChickens = 0
         for item in settingItems:
             item.update()
             item.draw()
@@ -222,6 +239,18 @@ while (running):
     else:
         print("INVALID STATE OF: %s RETURNING TO GAME"%state)
         state = "game"
+    for chicken in gameData.chickens:
+        died = chicken.update()
+        if died:
+            gameData.chickens.remove(chicken)
+        elif gameData.drawChickens:
+            chicken.draw()
+
+    for egg in gameData.eggsList:
+        egg.update()
+        if gameData.drawChickens:
+            egg.draw()
+
 
     for button in buttons:
         button.update()

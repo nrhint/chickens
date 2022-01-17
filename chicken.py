@@ -3,18 +3,19 @@
 
 import pygame
 from random import randint
-from math import sqrt
-from bar import Bar
+from utils.bar import Bar
 
 vv = False
 
-EGG_LAIED = pygame.USEREVENT+1
-eggLaied = pygame.event.Event(EGG_LAIED, message="Egg!")
+# EGG_LAIED = pygame.USEREVENT+1
+# eggLaied = pygame.event.Event(EGG_LAIED, message="Egg!")
 
 
 class Chicken:
-    def __init__(self, screen, image, gameData = None, x = 0, y = 0, v = False):
-        self.image = image
+    def __init__(self, screen, image, gameQueue, gameData = None, x = 0, y = 0, level = 1, v = False):
+        # self.image = image
+        self.image = pygame.transform.scale(image, (50, 50))
+        self.queue = gameQueue
         self.gameData = gameData
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(x, y)
@@ -25,13 +26,16 @@ class Chicken:
         self.lasty = self.y
         self.food = 50 #Range of 0-100 by default
         self.foodMax = 100
-        self.foodBar = Bar(self.x, self.y, self.foodMax, 8, self.screen, color = (150, 150, 0))
+        self.foodBar = Bar(self.x, self.y+10, self.image.get_width(), 8, self.screen, color = (150, 150, 0))
         self.hydration = 50 #Range of 0-100 by default
         self.hydrationMax = 100
-        self.hydrationBar = Bar(self.x, self.y+10, self.hydrationMax, 8, self.screen, color = (100, 100, 200))
+        self.hydrationBar = Bar(self.x, self.y+20, self.image.get_width(), 8, self.screen, color = (100, 100, 200))
         self.moving = False
         self.speed = 1
         self.targetPos = (self.x, self.y)
+        self.reDraw = True
+        self.level = level
+        self.baseLevelUpChance = 5
         
         self.v = v #verbose output
         if self.v: print(self.rect)
@@ -68,12 +72,14 @@ class Chicken:
         if randint(0, 1000) < chance:
             self.food -= amount
             if vv:print("%s got hungry"%self)
+            self.reDraw = True
         if self.v: self.status()
 
     def thirst(self, chance = 4, amount = 2):
         if randint(0, 1000) < chance:
             self.hydration -= amount
             if vv:print("%s got thirsty"%self)
+            self.reDraw = True
         if self.v: self.status()
 
     def status(self):
@@ -105,21 +111,31 @@ class Chicken:
                 self.y += self.speed
             if self.targetPos[0]-self.speed < self.x < self.targetPos[0]+self.speed and self.targetPos[1]-self.speed < self.y < self.targetPos[1]+self.speed:
                 self.moving = False
-                pygame.event.post(eggLaied)
+                self.queue.put(['newEgg', self.x+(self.image.get_width()/3), self.y+(self.image.get_height()/2), self.level])
+                # pygame.event.post(eggLaied)
                 #print("Finished moving")
+            self.reDraw = True
 
     def update(self):
         self.hunger()
         self.thirst()
         self.move()
+        levelUpChance = self.baseLevelUpChance
         if self.food <= 0:
             if self.v or vv or True: print("Chicken %s died from hunger..."%self)
             if self.v or vv: self.status()
             return True
+        elif self.food/self.foodMax > 0.8:
+            levelUpChance += 5
         if self.hydration <= 0:
             if self.v or vv or True: print("Chicken %s died from thirst..."%self)
             if self.v or vv: self.status()
             return True
+        elif self.hydration/ self.hydrationMax > 0.8:
+            levelUpChance += 5
+        if randint(0, 100) <= levelUpChance:
+            self.level += 1
+            self.image = pygame.transform.scale(self.image, (50+(self.level-1*10), 50+(self.level-1*10)))
         #if self.v: self.status()
         self.rect = self.rect.move(self.x-self.lastx, self.y-self.lasty)
         self.lastx = self.x
@@ -133,6 +149,7 @@ class Chicken:
         self.foodBar.draw()
         self.hydrationBar.draw()
         self.screen.blit(self.image, (self.x, self.y))
+        self.reDraw = False
 
     def input(self, mouseState, other = False): ##This will check if the chicken is clicked on.
         if self.v: print(mouseState)
