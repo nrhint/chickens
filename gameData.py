@@ -35,7 +35,7 @@ class GameData:
             self.hydrationCost = self.result[1][5]
             self.feeder = self.result[1][6]
             self.hydrator = self.result[1][7]
-            self.drawChickens = 1
+            self.drawChickens = 0
             self.chickens = self.result[0]
             for chicken in self.chickens:
                 chicken.gameData = self
